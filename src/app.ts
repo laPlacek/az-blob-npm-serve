@@ -7,7 +7,7 @@ import cors from 'cors';
 const PORT = parseInt(process.env.PORT!) || 3000;
 
 const containerClient = createContainerClient({
-    account: process.env.ACCOUNT!,
+    account: process.env.ACCOUNT!, 
     accountKey: process.env.ACCOUNT_KEY!,
     containerName: process.env.CONTAINER_NAME!
 });
@@ -15,7 +15,7 @@ const containerClient = createContainerClient({
 
 const app = express();
 app.use(cors())
-app.use('/(@:scope/)?:noScopeName@:tag/*', async (req, res) => {
+app.use('/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
     const { scope, noScopeName, tag } = req.params; 
     const filePath = req.params[0] as string;
 
