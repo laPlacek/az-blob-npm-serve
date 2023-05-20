@@ -1,10 +1,15 @@
-import express from 'express';
 import { createContainerClient } from './container';
 import { getPackageStream, resolveVersion } from './package';
 import { valid } from 'semver'
 import cors from 'cors';
+import log from 'loglevel';
+import dotenv from 'dotenv';
+import express from 'express';
 
-const PORT = parseInt(process.env.PORT!) || 3000;
+dotenv.config();
+log.setLevel(0)
+
+const PORT = parseInt(process.env.PORT!);
 
 const containerClient = createContainerClient({
     account: process.env.ACCOUNT!, 
@@ -14,14 +19,14 @@ const containerClient = createContainerClient({
 
 
 const app = express();
-app.use(cors())
+app.use(cors());
 app.use('/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
     const { scope, noScopeName, tag } = req.params; 
     const filePath = req.params[0] as string;
 
     const name = scope ? `@${scope}/${noScopeName}` : noScopeName;
 
-    console.info(`\n${filePath} from ${name}@${tag} requested`);
+    log.info(`\n${filePath} from ${name}@${tag} requested`);
 
     let version: string;
     try {
@@ -32,7 +37,7 @@ app.use('/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
             if (!v) throw Error()
 
             version = v;
-            console.info(`${name}@${tag} resolved to ${name}@${version}`);
+            log.info(`${name}@${tag} resolved to ${name}@${version}`);
         }
 
 
@@ -42,7 +47,7 @@ app.use('/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
         res.send(`${name}@${tag} not found`);
         res.end();
 
-        console.log(`${name}@${tag} not found`);
+        log.log(`${name}@${tag} not found`);
         return;
     }
 
@@ -58,19 +63,19 @@ app.use('/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
         })
         .on('end', async () => {
             res.end();
-            console.info(`${filePath} from ${name}@${version} served`)
+            log.info(`${filePath} from ${name}@${version} served`)
         });
     } catch {
         res.statusCode = 500;
         res.send(`Could not read ${name}@${version}`);
         res.end();
 
-        console.error(`Could not read ${name}@${version}`);
+        log.error(`Could not read ${name}@${version}`);
         return;
     }
 });
 
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Port: ${PORT}`);
+    log.log(`Port: ${PORT}`);
 });
