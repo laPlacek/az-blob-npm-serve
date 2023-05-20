@@ -20,7 +20,7 @@ const containerClient = createContainerClient({
 
 const app = express();
 app.use(cors());
-app.use('/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
+app.use('/npm/(:scope/)?:noScopeName/:tag/*', async (req, res) => {
     const { scope, noScopeName, tag } = req.params; 
     const filePath = req.params[0] as string;
 
